@@ -480,31 +480,29 @@
             lockToggle.textContent = '⏳ Updating...';
 
             try {
-                // Use a different approach - call the script URL directly
-                const timestamp = new Date().getTime();
-                const url = SCRIPT_URL + '?t=' + timestamp;
-                
-                await fetch(url, {
+                await fetch(SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ type: 'toggleLock' }),
-                    redirect: 'follow'
+                    body: JSON.stringify({ type: 'toggleLock' })
                 });
 
                 // Wait 2 seconds for the script to process
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 
-                // Refresh status
+                // Refresh status from server
                 await checkLockStatus();
                 lockToggle.disabled = false;
+                
+                alert('Lock status has been toggled. Check the status above or verify in your Google Sheet Config tab (cell B2).');
 
             } catch (error) {
                 console.error('Error toggling lock:', error);
-                alert('Lock status updated (or there was an error - check your Google Sheet Config tab to verify)');
-                await checkLockStatus();
+                lockToggle.textContent = '🔒 Lock Submissions';
                 lockToggle.disabled = false;
+                alert('Request sent, but could not verify. Check your Google Sheet Config tab to confirm the change.');
             }
         });
 
