@@ -230,6 +230,18 @@
                 Enter the actual results as they happen during the game. The leaderboard will update automatically.
             </div>
 
+            <div class="controls" style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 10px; padding: 20px; margin-bottom: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <strong style="display: block; margin-bottom: 5px;">Submission Control:</strong>
+                        <span id="lockStatus" style="color: #28a745; font-weight: 600;">Submissions are OPEN</span>
+                    </div>
+                    <button type="button" id="lockToggle" class="submit-btn" style="padding: 12px 30px; font-size: 1em;">
+                        🔒 Lock Submissions
+                    </button>
+                </div>
+            </div>
+
             <form id="resultsForm">
                 <div class="bet-category">
                     <h3>Game Winner</h3>
@@ -434,6 +446,63 @@
         const successMessage = document.getElementById('successMessage');
         const errorMessage = document.getElementById('errorMessage');
         const submitBtn = document.getElementById('submitBtn');
+        const lockToggle = document.getElementById('lockToggle');
+        const lockStatus = document.getElementById('lockStatus');
+
+        // Check and display current lock status
+        async function checkLockStatus() {
+            try {
+                const response = await fetch(SCRIPT_URL + '?action=checkLock');
+                const data = await response.json();
+                
+                if (data.locked) {
+                    lockStatus.textContent = 'Submissions are CLOSED';
+                    lockStatus.style.color = '#dc3545';
+                    lockToggle.textContent = '🔓 Unlock Submissions';
+                    lockToggle.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                } else {
+                    lockStatus.textContent = 'Submissions are OPEN';
+                    lockStatus.style.color = '#28a745';
+                    lockToggle.textContent = '🔒 Lock Submissions';
+                    lockToggle.style.background = 'linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%)';
+                }
+            } catch (error) {
+                console.error('Error checking lock status:', error);
+            }
+        }
+
+        // Toggle lock status
+        lockToggle.addEventListener('click', async function() {
+            const confirmed = confirm('Are you sure you want to change the submission lock status?');
+            if (!confirmed) return;
+
+            lockToggle.disabled = true;
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ type: 'toggleLock' })
+                });
+
+                // Wait a moment then refresh status
+                setTimeout(() => {
+                    checkLockStatus();
+                    lockToggle.disabled = false;
+                }, 1000);
+
+            } catch (error) {
+                console.error('Error toggling lock:', error);
+                alert('Error changing lock status. Please try again.');
+                lockToggle.disabled = false;
+            }
+        });
+
+        // Check lock status on page load
+        checkLockStatus();
 
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
