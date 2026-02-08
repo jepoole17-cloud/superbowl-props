@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Enter Results</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #c31432 0%, #240b36 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .admin-warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 30px;
+            color: #856404;
+        }
+
+        .admin-warning strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .bet-category {
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .bet-category:last-of-type {
+            border-bottom: none;
+        }
+
+        .bet-category h3 {
+            color: #c31432;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .bet-category h3::before {
+            content: "⚙️";
+            margin-right: 10px;
+        }
+
+        .bet-options {
+            display: grid;
+            gap: 10px;
+        }
+
+        .bet-option {
+            position: relative;
+        }
+
+        .bet-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .bet-option label {
+            display: block;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+
+        .bet-option input[type="radio"]:checked + label {
+            background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
+            color: white;
+            border-color: #fc4a1a;
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(252, 74, 26, 0.4);
+        }
+
+        .bet-option label:hover {
+            border-color: #fc4a1a;
+            background: #fff5f0;
+        }
+
+        .bet-option input[type="radio"]:checked + label:hover {
+            background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
+        }
+
+        .submit-section {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(252, 74, 26, 0.4);
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(252, 74, 26, 0.6);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .success-message {
+            display: none;
+            padding: 30px;
+            text-align: center;
+            background: #d4edda;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .success-message h2 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #fc4a1a;
+            font-weight: 600;
+        }
+
+        .error-message {
+            display: none;
+            padding: 20px;
+            background: #f8d7da;
+            color: #721c24;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .view-leaderboard-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+
+        .view-leaderboard-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔒 Admin Panel</h1>
+            <p>Enter Actual Game Results</p>
+        </div>
+
+        <div class="content">
+            <div class="admin-warning">
+                <strong>⚠️ Admin Access Only</strong>
+                Enter the actual results as they happen during the game. The leaderboard will update automatically.
+            </div>
+
+            <form id="resultsForm">
+                <div class="bet-category">
+                    <h3>Game Winner</h3>
+                    <div class="bet-options">
+                        <div class="bet-option">
+                            <input type="radio" id="winner1" name="winner" value="New England Patriots" required>
+                            <label for="winner1">New England Patriots</label>
+                        </div>
+                        <div class="bet-option">
+                            <input type="radio" id="winner2" name="winner" value="Seattle Seahawks">
+                            <label for="winner2">Seattle Seahawks</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bet-category">
+                    <h3>Total Points (Over/Under)</h3>
+                    <div class="bet-options">
+                        <div class="bet-option">
+                            <input type="radio" id="points1" name="totalPoints" value="Over 45.5" required>
+                            <label for="points1">Over 45.5</label>
+                        </div>
+                        <div class="bet-option">
+                            <input type="radio" id="points2" name="totalPoints" value="Under 45.5">
+                            <label for="points2">Under 45.5</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bet-category">
+                    <h3>First Team to Score</h3>
+                    <div class="bet-options">
+                        <div class="bet-option">
+                            <input type="radio" id="first1" name="firstScore" value="New England Patriots" required>
+                            <label for="first1">New England Patriots</label>
+                        </div>
+                        <div class="bet-option">
+                            <input type="radio" id="first2" name="firstScore" value="Seattle Seahawks">
+                            <label for="first2">Seattle Seahawks</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bet-category">
+                    <h3>MVP</h3>
+                    <div class="bet-options">
+                        <div class="bet-option">
+                            <input type="radio" id="mvp1" name="mvp" value="Sam Darnold" required>
+                            <label for="mvp1">Sam Darnold</label>
+                        </div>
+                        <div class="bet-option">
+                            <input type="radio" id="mvp2" name="mvp" value="Drake Maye">
+                            <label for="mvp2">Drake Maye</label>
+                        </div>
+                        <div class="bet-option">
+                            <input type="radio" id="mvp3" name="mvp" value="Jaxon Smith-Njigba">
+                            <label for="mvp3">Jaxon Smith-Njigba</label>
+                        </div>
+                        <div class="bet-option">
+                            <input type="radio" id="mvp4" name="mvp" value="Kenneth Walker III">
+                            <label for="mvp4">Kenneth Walker III</label>
+                        </div>
+                        <div class="bet-option">
+                            <input type="radio" id="mvp5" name="mvp" value="Rhamondre Stevenson">
+                            <label for="mvp5">Rhamondre Stevenson</label>
+                        </div>
+                        <div class="bet-option">
+                            <input type="radio" id="mvp6" name="mvp" value="Rashid Shaheed">
+                            <label for="mvp6">Rashid Shaheed</label>
+                        </div>
+                        <div class="bet-option">
+                            <input type="radio" id="mvp7" name="mvp" value="Stefon Diggs">
+                            <label for="mvp7">Stefon Diggs</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bet-category">
+                    <h3>Which Bay Area Landmark Shown First?</h3>
+                    <div class="bet-options">
+                        <div class="bet-option">
+                            <input type="radio" id="landmark1" name="landmark" value="Golden Gate Bridge" required>
+                            <label for="landmark1">Golden Gate Bridge</label>
+                        </div>
+                        <div class="bet-option">
+                            <input type="radio" id="landmark2" name="landmark" value="Alcatraz Island">
+                            <label for="landmark2">Alcatraz Island</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bet-category">
+                    <h3>National Anthem Length (Over/Under)</h3>
+                    <div class="bet-options">
+                        <div class="bet-option">
+                            <input type="radio" id="anthem1" name="anthem" value="Over 116 seconds" required>
+                            <label for="anthem1">Over 116 seconds</label>
+                        </div>
+                        <div class="bet-option">
+                            <input type="radio" id="anthem2" name="anthem" value="Under 116 seconds">
+                            <label for="anthem2">Under 116 seconds</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bet-category">
+                    <h3>Coin Toss Result</h3>
+                    <div class="bet-options">
+                        <div class="bet-option">
+                            <input type="radio" id="coin1" name="coinToss" value="Heads" required>
+                            <label for="coin1">Heads</label>
+                        </div>
+                        <div class="bet-option">
+                            <input type="radio" id="coin2" name="coinToss" value="Tails">
+                            <label for="coin2">Tails</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bet-category">
+                    <h3>Will there be a Defensive/Special Teams TD?</h3>
+                    <div class="bet-options">
+                        <div class="bet-option">
+                            <input type="radio" id="defTD1" name="defensiveTD" value="Yes" required>
+                            <label for="defTD1">Yes</label>
+                        </div>
+                        <div class="bet-option">
+                            <input type="radio" id="defTD2" name="defensiveTD" value="No">
+                            <label for="defTD2">No</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bet-category">
+                    <h3>Halftime Show Length</h3>
+                    <div class="bet-options">
+                        <div class="bet-option">
+                            <input type="radio" id="halftime1" name="halftimeLength" value="Over 14.5 minutes" required>
+                            <label for="halftime1">Over 14.5 minutes</label>
+                        </div>
+                        <div class="bet-option">
+                            <input type="radio" id="halftime2" name="halftimeLength" value="Under 14.5 minutes">
+                            <label for="halftime2">Under 14.5 minutes</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bet-category">
+                    <h3>Gatorade Bath Color</h3>
+                    <div class="bet-options">
+                        <div class="bet-option">
+                            <input type="radio" id="gatorade1" name="gatorade" value="Yellow/Lime/Green" required>
+                            <label for="gatorade1">Yellow/Lime/Green</label>
+                        </div>
+                        <div class="bet-option">
+                            <input type="radio" id="gatorade2" name="gatorade" value="Blue">
+                            <label for="gatorade2">Blue</label>
+                        </div>
+                        <div class="bet-option">
+                            <input type="radio" id="gatorade3" name="gatorade" value="Orange">
+                            <label for="gatorade3">Orange</label>
+                        </div>
+                        <div class="bet-option">
+                            <input type="radio" id="gatorade4" name="gatorade" value="Purple">
+                            <label for="gatorade4">Purple</label>
+                        </div>
+                        <div class="bet-option">
+                            <input type="radio" id="gatorade5" name="gatorade" value="Red/Pink">
+                            <label for="gatorade5">Red/Pink</label>
+                        </div>
+                        <div class="bet-option">
+                            <input type="radio" id="gatorade6" name="gatorade" value="Clear/Water">
+                            <label for="gatorade6">Clear/Water</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="loading" id="loading">
+                    Saving results...
+                </div>
+
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage">
+                    <h2>✅ Results Saved!</h2>
+                    <p>The leaderboard has been updated with the actual results.</p>
+                    <a href="leaderboard.html" class="view-leaderboard-btn">View Leaderboard</a>
+                </div>
+
+                <div class="submit-section">
+                    <button type="submit" class="submit-btn" id="submitBtn">Save Results</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // REPLACE THIS WITH YOUR GOOGLE APPS SCRIPT WEB APP URL
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_RDLcWzXddt8KE1xLDsfHg3wZgU_RqkYM_1QTmaPkmRiZdLDJk3T3UO_VW_jcAbo/exec';
+
+        const form = document.getElementById('resultsForm');
+        const loading = document.getElementById('loading');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+
+            const formData = new FormData(form);
+            const results = {};
+            
+            for (let [key, value] of formData.entries()) {
+                results[key] = value;
+            }
+
+            // Mark this as admin results
+            results.type = 'results';
+            results.timestamp = new Date().toISOString();
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(results)
+                });
+
+                loading.style.display = 'none';
+                successMessage.style.display = 'block';
+                submitBtn.disabled = false;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            } catch (error) {
+                console.error('Error:', error);
+                loading.style.display = 'none';
+                errorMessage.textContent = 'There was an error saving the results. Please try again.';
+                errorMessage.style.display = 'block';
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
