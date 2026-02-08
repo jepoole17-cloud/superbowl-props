@@ -452,22 +452,28 @@
         // Check and display current lock status
         async function checkLockStatus() {
             try {
-                const response = await fetch(SCRIPT_URL + '?action=checkLock');
+                const timestamp = new Date().getTime();
+                const response = await fetch(SCRIPT_URL + '?action=checkLock&t=' + timestamp);
                 const data = await response.json();
                 
-                if (data.locked) {
-                    lockStatus.textContent = 'Submissions are CLOSED';
-                    lockStatus.style.color = '#dc3545';
-                    lockToggle.textContent = '🔓 Unlock Submissions';
-                    lockToggle.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
-                } else {
-                    lockStatus.textContent = 'Submissions are OPEN';
-                    lockStatus.style.color = '#28a745';
-                    lockToggle.textContent = '🔒 Lock Submissions';
-                    lockToggle.style.background = 'linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%)';
-                }
+                updateLockDisplay(data.locked);
             } catch (error) {
-                console.error('Error checking lock status:', error);
+                console.log('Could not check lock status automatically');
+                // Don't show error to user - they can verify in Google Sheet
+            }
+        }
+
+        function updateLockDisplay(isLocked) {
+            if (isLocked) {
+                lockStatus.textContent = 'Submissions are CLOSED';
+                lockStatus.style.color = '#dc3545';
+                lockToggle.textContent = '🔓 Unlock Submissions';
+                lockToggle.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+            } else {
+                lockStatus.textContent = 'Submissions are OPEN';
+                lockStatus.style.color = '#28a745';
+                lockToggle.textContent = '🔒 Lock Submissions';
+                lockToggle.style.background = 'linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%)';
             }
         }
 
@@ -492,17 +498,21 @@
                 // Wait 2 seconds for the script to process
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 
-                // Refresh status from server
-                await checkLockStatus();
-                lockToggle.disabled = false;
+                // Try to refresh status, but if it fails, just reload the page
+                try {
+                    await checkLockStatus();
+                } catch (e) {
+                    // If we can't check status via API, just reload the page
+                    window.location.reload();
+                }
                 
-                alert('Lock status has been toggled. Check the status above or verify in your Google Sheet Config tab (cell B2).');
+                lockToggle.disabled = false;
 
             } catch (error) {
                 console.error('Error toggling lock:', error);
-                lockToggle.textContent = '🔒 Lock Submissions';
                 lockToggle.disabled = false;
-                alert('Request sent, but could not verify. Check your Google Sheet Config tab to confirm the change.');
+                // Reload page to see updated status
+                window.location.reload();
             }
         });
 
